@@ -34,6 +34,20 @@ async function main() {
       table.increments();
       table.string('name').notNullable();
     })
+    .createTable('comment', (table) => {
+      table.increments();
+      table.text('content', 'TEXT').notNullable();
+      table
+        .dateTime('date')
+        .notNullable()
+        .defaultTo(knex.raw('CURRENT_TIMESTAMP'));
+
+      table.integer('user_id').unsigned().notNullable();
+      table.foreign('user_id').references('user.id');
+
+      table.integer('article_id').unsigned().notNullable();
+      table.foreign('article_id').references('article.id');
+    })
     // Pivot Tables
     .createTable('article_tag', (table) => {
       table.integer('tag_id').unsigned().notNullable();
