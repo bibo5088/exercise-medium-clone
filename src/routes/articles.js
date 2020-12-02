@@ -26,7 +26,7 @@ router.get('/', async (req, res) => {
     content: r.content,
     thumbnail: r.thumbnail,
     date: r.date,
-    user: {
+    author: {
       id: r.user_id,
       name: r.user_name,
       avatar: r.user_avatar,

@@ -48,7 +48,7 @@ describe('/api/articles', () => {
         content: article1.content,
         thumbnail: article1.thumbnail,
         date: article1.date.toISOString(),
-        user: {
+        author: {
           id: user.id,
           name: user.name,
           avatar: user.avatar,
@@ -64,7 +64,7 @@ describe('/api/articles', () => {
         content: article2.content,
         thumbnail: article2.thumbnail,
         date: article2.date.toISOString(),
-        user: {
+        author: {
           id: user.id,
           name: user.name,
           avatar: user.avatar,
