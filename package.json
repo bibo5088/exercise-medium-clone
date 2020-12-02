@@ -6,7 +6,7 @@
     "start": "node src/index.js",
     "watch": "nodemon src/index.js",
     "migrate": "node src/scripts/migrate.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +20,10 @@
     "mysql": "2.18.1"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.12.7",
+    "@types/jest": "^26.0.16",
+    "babel-jest": "^26.6.3",
+    "faker": "^5.1.0",
     "jest": "26.4.2",
     "nodemon": "^2.0.6",
     "supertest": "^6.0.1"
