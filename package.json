@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
-    "watch": "nodemon src/index.js",
+    "start": "node src/index.js --unhandled-rejections=strict",
+    "watch": "nodemon src/index.js -- --unhandled-rejections=strict",
     "migrate": "node src/scripts/migrate.js",
+    "seed": "node src/scripts/seed.js",
     "test": "jest"
   },
   "keywords": [],

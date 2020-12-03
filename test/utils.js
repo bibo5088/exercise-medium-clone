@@ -20,6 +20,12 @@ export async function insertFakeCategory() {
   });
 }
 
+export async function insertFakeTag() {
+  return await insertFakeData('tag', {
+    name: faker.lorem.word(),
+  });
+}
+
 export async function insertFakeArticle(authorId, categoryId) {
   const name = faker.lorem.sentence();
 
@@ -31,5 +37,14 @@ export async function insertFakeArticle(authorId, categoryId) {
     date: faker.date.past(),
     author_id: authorId,
     category_id: categoryId,
+  });
+}
+
+export async function insertFakeComment(userId, articleId) {
+  return await insertFakeData('comment', {
+    content: faker.lorem.sentences(2),
+    date: faker.date.past(),
+    user_id: userId,
+    article_id: articleId,
   });
 }
