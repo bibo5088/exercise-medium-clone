@@ -190,4 +190,8 @@ describe('/api/articles', () => {
       comments: [],
     });
   });
+
+  it("GET /:id - Should return 404 if article id doesn't exist", async () => {
+    await supertest(app).get(`/api/articles/404`).expect(404);
+  });
 });

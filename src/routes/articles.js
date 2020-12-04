@@ -43,19 +43,9 @@ router.get('/', async (req, res) => {
 router.get('/:id(\\d+)', async (req, res) => {
   const id = Number(req.params.id);
 
-  const rawArticle = await knex({ a: 'article' })
+  const articleQuery = knex({ a: 'article' })
     .leftJoin({ u: 'user' }, 'a.author_id', '=', 'u.id')
     .leftJoin({ c: 'category' }, 'a.category_id', '=', 'c.id')
-    .leftJoin({ t: 'tag' }, (join) => {
-      join.onIn(
-        't.id',
-        knex('article_tag')
-          .select('article_tag.tag_id')
-          .where('article_tag.article_id', '=', knex.raw('a.id'))
-      );
-    })
-    .leftJoin({ co: 'comment' }, 'co.article_id', '=', 'a.id')
-    .leftJoin({ co_u: 'user' }, 'co_u.id', '=', 'co.user_id')
     .where('a.id', '=', id)
     .select(
       'a.id',
@@ -71,69 +61,71 @@ router.get('/:id(\\d+)', async (req, res) => {
       { category_id: 'c.id' },
       { category_name: 'c.name' },
 
-      { tag_id: 't.id' },
-      { tag_name: 't.name' },
-
-      { comment_id: 'co.id' },
-      { comment_content: 'co.content' },
-      { comment_date: 'co.date' },
-
-      { comment_user_id: 'co_u.id' },
-      { comment_user_name: 'co_u.name' },
-      { comment_user_avatar: 'co_u.avatar' },
-
       {
         like_count: knex('liked').count('*').where('article_id', '=', id),
       }
+    )
+    .first();
+  const tagsQuery = knex('tag').whereIn(
+    'id',
+    knex('article_tag')
+      .select('article_tag.tag_id')
+      .where('article_tag.article_id', '=', id)
+  );
+  const commentsQuery = knex({ c: 'comment' })
+    .where('c.article_id', '=', id)
+    .leftJoin({ u: 'user' }, 'u.id', '=', 'c.user_id')
+    .select(
+      'c.id',
+      'c.content',
+      'c.date',
+
+      { user_id: 'u.id' },
+      { user_name: 'u.name' },
+      { user_avatar: 'u.avatar' }
     );
+
+  const [rawArticle, rawTags, rawComments] = await Promise.all([
+    articleQuery,
+    tagsQuery,
+    commentsQuery,
+  ]);
 
   if (rawArticle == undefined) {
     return res.status(404).end();
   }
 
   const article = {
-    id: rawArticle[0].id,
-    name: rawArticle[0].name,
-    content: rawArticle[0].content,
-    thumbnail: rawArticle[0].thumbnail,
-    date: rawArticle[0].date,
-    likeCount: rawArticle[0].like_count,
+    id: rawArticle.id,
+    name: rawArticle.name,
+    content: rawArticle.content,
+    thumbnail: rawArticle.thumbnail,
+    date: rawArticle.date,
+    likeCount: rawArticle.like_count,
     author: {
-      id: rawArticle[0].user_id,
-      name: rawArticle[0].user_name,
-      avatar: rawArticle[0].user_avatar,
+      id: rawArticle.user_id,
+      name: rawArticle.user_name,
+      avatar: rawArticle.user_avatar,
     },
     category: {
-      id: rawArticle[0].category_id,
-      name: rawArticle[0].category_name,
+      id: rawArticle.category_id,
+      name: rawArticle.category_name,
     },
-    tags: {},
-    comments: {},
+    tags: rawTags.map((t) => ({
+      id: t.id,
+      name: t.name,
+    })),
+    comments: rawComments.map((c) => ({
+      id: c.id,
+      content: c.content,
+      date: c.date,
+      user: {
+        id: c.user_id,
+        name: c.user_name,
+        avatar: c.user_avatar,
+      },
+    })),
   };
-
-  for (const row of rawArticle) {
-    if (row.tag_id != null) {
-      article.tags[row.tag_id] = {
-        id: row.tag_id,
-        name: row.tag_name,
-      };
-    }
-
-    if (row.comment_id != null) {
-      article.comments[row.comment_id] = {
-        id: row.comment_id,
-        content: row.comment_content,
-        date: row.comment_date,
-        user: {
-          id: row.comment_user_id,
-          name: row.comment_user_name,
-          avatar: row.comment_user_avatar,
-        },
-      };
-    }
-  }
-  article.tags = Object.values(article.tags);
-  article.comments = Object.values(article.comments);
 
   res.json(article);
 });
