@@ -8,6 +8,7 @@ import {
   insertFakeComment,
   insertFakeTag,
   insertFakeUser,
+  truncateDatabase,
 } from './utils.js';
 
 jest.setTimeout(30000);
@@ -22,15 +23,7 @@ describe('/api/articles', () => {
   let tag1;
   let tag2;
   beforeEach(async () => {
-    await knex.raw('SET FOREIGN_KEY_CHECKS = 0');
-    await knex('article').truncate();
-    await knex('category').truncate();
-    await knex('user').truncate();
-    await knex('comment').truncate();
-    await knex('article_tag').truncate();
-    await knex('tag').truncate();
-    await knex('liked').truncate();
-    await knex.raw('SET FOREIGN_KEY_CHECKS = 1');
+    await truncateDatabase();
 
     user = await insertFakeUser();
 

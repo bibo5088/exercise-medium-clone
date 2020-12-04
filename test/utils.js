@@ -1,6 +1,23 @@
 import faker from 'faker';
 import knex from '../src/knex.js';
 
+export async function truncateDatabase() {
+  return await knex.transaction(async (trx) => {
+    await trx.raw('SET FOREIGN_KEY_CHECKS = 0');
+    const dbName = knex.client.config.connection.database;
+
+    const tables = await trx('information_schema.tables')
+      .where('table_schema', '=', dbName)
+      .select('table_name');
+
+    for (const table of tables) {
+      await trx.truncate(table.TABLE_NAME);
+    }
+
+    await trx.raw('SET FOREIGN_KEY_CHECKS = 1');
+  });
+}
+
 async function insertFakeData(table, data) {
   const [id] = await knex(table).insert(data);
 
